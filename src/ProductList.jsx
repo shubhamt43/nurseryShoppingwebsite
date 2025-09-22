@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItem } from './CartSlice';
 import './ProductList.css'
@@ -11,15 +11,27 @@ function ProductList({ onHomeClick }) {
     const dispatch = useDispatch();
     const cartItems = useSelector(state => state.cart.items); // Get cart items from Redux store
 
+    // Use a useEffect to reset the 'addedToCart' state when an item is removed from the cart
+    useEffect(() => {
+        const newAddedToCart = {};
+        cartItems.forEach(item => {
+            newAddedToCart[item.name] = true;
+        });
+        setAddedToCart(newAddedToCart);
+    }, [cartItems]);
+
     // Calculate total quantity of items in the cart
     const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     const handleAddToCart = (product) => {
-        dispatch(addItem(product));
-        setAddedToCart((prevState) => ({
-            ...prevState,
-            [product.name]: true,
-        }));
+        // Only add the item if it hasn't been added yet
+        if (!addedToCart[product.name]) {
+            dispatch(addItem(product));
+            setAddedToCart((prevState) => ({
+                ...prevState,
+                [product.name]: true,
+            }));
+        }
     };
 
     const plantsArray = [
@@ -295,13 +307,13 @@ function ProductList({ onHomeClick }) {
                                     <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path>
                                     {totalQuantity > 0 && (
                                         <text
-                                            x="130" // Adjust this value to center the text horizontally
-                                            y="125" // Adjust this value to center the text vertically
-                                            fontSize="55" // Adjust font size as needed
+                                            x="130"
+                                            y="125"
+                                            fontSize="55"
                                             fontWeight="bold"
                                             fill="#faf9f9"
-                                            textAnchor="middle" // Center text horizontally on the x-coordinate
-                                            alignmentBaseline="middle" // Center text vertically on the y-coordinate
+                                            textAnchor="middle"
+                                            alignmentBaseline="middle"
                                         >
                                             {totalQuantity}
                                         </text>
@@ -333,8 +345,9 @@ function ProductList({ onHomeClick }) {
                                         <button
                                             className="product-button"
                                             onClick={() => handleAddToCart(plant)}
+                                            style={{ backgroundColor: addedToCart[plant.name] ? '#808080' : '' }}
                                         >
-                                            Add to Cart
+                                            {addedToCart[plant.name] ? 'Added to Cart' : 'Add to Cart'}
                                         </button>
                                     </div>
                                 ))}

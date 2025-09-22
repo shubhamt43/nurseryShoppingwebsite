@@ -30,9 +30,13 @@ if (itemToUpdate) {
 }
 
         },
+        // New action to restore the item
+        restoreItem: (state, action) => {
+            state.items = state.items.filter(item => item.name !== action.payload);
+        },
     },
 });
 
-export const { addItem, removeItem, updateQuantity } = CartSlice.actions;
+export const { addItem, removeItem, updateQuantity, restoreItem } = CartSlice.actions;
 
 export default CartSlice.reducer;
